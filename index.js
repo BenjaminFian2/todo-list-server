@@ -18,13 +18,20 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 const ToDo = mongoose.model("Todo", {
   title: String,
+  checked: Boolean,
 });
 
 app.post("/create", async (req, res) => {
   try {
-    const toDo = new ToDo({ title: req.fields.title });
-    await toDo.save();
-    res.status(200).json({ message: "new task created" });
+    const task = await ToDo.findOne({ title: req.fields.title });
+    if (!task) {
+      const toDo = new ToDo({
+        title: req.fields.title,
+        checked: req.fields.checked,
+      });
+      await toDo.save();
+      res.status(200).json({ message: "new task created" });
+    }
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
